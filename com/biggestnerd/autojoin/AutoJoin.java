@@ -34,7 +34,7 @@ public class AutoJoin {
 		if(mc.currentScreen instanceof GuiConnecting && mc.func_147104_D() != null) {
 			last = mc.func_147104_D();
 		}
-		if(counter >= 450) {
+		if(counter >= 420) {
 			mc.displayGuiScreen(new GuiConnecting(mc.currentScreen, mc, last));
 			System.out.println("Connecting to " + last.serverIP);
 			counter = 0;
