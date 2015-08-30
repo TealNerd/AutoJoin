@@ -24,7 +24,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
-@Mod(modid="autojoin", name="AutoJoin", version="v1.4")
+@Mod(modid="autojoin", name="AutoJoin", version="v1.5")
 public class AutoJoin {
 
 	Minecraft mc = Minecraft.getMinecraft();
@@ -37,6 +37,9 @@ public class AutoJoin {
 	File macroFolder;
 	File macroGlobalVars;
 	long logoutCheckTimer = 0;
+	boolean relog = false;
+	long relogTime = 0;
+	long relogStartTime = 0;
 	
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -88,33 +91,40 @@ public class AutoJoin {
 		if(mc.theWorld != null && !mc.isSingleplayer() && System.currentTimeMillis() - logoutCheckTimer > 5000) {
 			logoutCheckTimer = System.currentTimeMillis();
 			try {
-				if(isAutoRelog()) {
+				if(getAutoRelogTime() != 0) {
 					last = mc.getCurrentServerData();
 					mc.theWorld.sendQuittingDisconnectingPacket();
-					mc.displayGuiScreen(new GuiDisconnected(null, "Get fukt", new ChatComponentText("lelelelele")));
+					mc.displayGuiScreen(new GuiMainMenu());
+					relogTime = getAutoRelogTime();
+					relogStartTime = System.currentTimeMillis();
+					relog = true;
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
+		if(relog && !mc.inGameHasFocus && System.currentTimeMillis() - relogStartTime > relogTime) {
+			mc.displayGuiScreen(new GuiConnecting(new GuiMainMenu(), mc, last));
+			relog = false;
+		}
 	}
 	
-	public boolean isAutoRelog() throws Exception {
+	public long getAutoRelogTime() throws Exception {
 		if(!macromod) {
-			return false;
+			return 0;
 		}
-		Pattern p = Pattern.compile("auto_relog\">(0|1)");
+		Pattern p = Pattern.compile("#auto_relog\">(\\d+)");
 		BufferedReader reader = new BufferedReader(new FileReader(macroGlobalVars));
 		String line = "";
 		while((line = reader.readLine()) != null) {
 			Matcher m = p.matcher(line);
 			if(m.find()) {
 				reader.close();
-				return Integer.parseInt(m.group(1)) == 1;
+				return Long.parseLong(m.group(1));
 			}
 		}
 		reader.close();
-		return false;
+		return 0;
 	}
 	
 	public void logToFile(String message) throws Exception {
