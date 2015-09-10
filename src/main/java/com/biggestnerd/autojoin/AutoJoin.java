@@ -24,7 +24,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
-@Mod(modid="autojoin", name="AutoJoin", version="v1.5.1")
+@Mod(modid="autojoin", name="AutoJoin", version="v1.5.2")
 public class AutoJoin {
 
 	Minecraft mc = Minecraft.getMinecraft();
@@ -100,45 +100,31 @@ public class AutoJoin {
 			logoutCheckTimer = System.currentTimeMillis();
 			try {
 				//getAutoRelogTime gives us a time in milliseconds for how long we should stay logged out, it will be 0 if we shouldnt log out
-				if(getAutoRelogTime() != 0) {
+				long time = getAndResetAutoRelogTime();
+				if(time > 0) {
 					last = mc.getCurrentServerData();
 					mc.theWorld.sendQuittingDisconnectingPacket();
 					mc.displayGuiScreen(new GuiMainMenu());
-					relogTime = getAutoRelogTime();
 					relogStartTime = System.currentTimeMillis();
+					relogTime = time;
 					relog = true;
-					resetRelogVariable();
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
 		//if we're supposed to relog, and we're not ingame, and it's been relogtime since we logged out, log back in and set relog to false
-		if(relog && !mc.inGameHasFocus && System.currentTimeMillis() - relogStartTime > relogTime) {
+		if(relog && (mc.currentScreen instanceof GuiMainMenu) && System.currentTimeMillis() - relogStartTime > relogTime) {
 			mc.displayGuiScreen(new GuiConnecting(new GuiMainMenu(), mc, last));
 			relog = false;
 		}
 	}
 	
-	public long getAutoRelogTime() throws Exception {
+	public long getAndResetAutoRelogTime() throws Exception {
 		if(!macromod) {
 			return 0;
 		}
-		Pattern p = Pattern.compile("#auto_relog\">(\\d+)");
-		BufferedReader reader = new BufferedReader(new FileReader(macroGlobalVars));
-		String line = "";
-		while((line = reader.readLine()) != null) {
-			Matcher m = p.matcher(line);
-			if(m.find()) {
-				reader.close();
-				return Long.parseLong(m.group(1));
-			}
-		}
-		reader.close();
-		return 0;
-	}
-	
-	public void resetRelogVariable() throws Exception {
+		long time = 0;
 		Pattern p = Pattern.compile("#auto_relog\">(\\d+)");
 		BufferedReader reader = new BufferedReader(new FileReader(macroGlobalVars));
 		List<String> lines = new ArrayList<String>();
@@ -146,7 +132,7 @@ public class AutoJoin {
 		while((line = reader.readLine()) != null) {
 			Matcher m = p.matcher(line);
 			if(m.find()) {
-				lines.add("    <entry key=\"#auto_relog\">0</entry>");
+				time = Long.parseLong(m.group(1));
 			} else {
 				lines.add(line);
 			}
@@ -157,6 +143,7 @@ public class AutoJoin {
 			writer.write(s + "\n");
 		}
 		writer.close();
+		return time;
 	}
 	
 	public void logToFile(String message) throws Exception {
