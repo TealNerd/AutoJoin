@@ -17,7 +17,7 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "v1.5"
+version = "v1.5.1"
 group= "com.biggestnerd.autojoin" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "[1.8]AutoJoin"
 

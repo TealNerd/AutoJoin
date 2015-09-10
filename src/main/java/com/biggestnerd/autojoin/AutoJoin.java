@@ -24,7 +24,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
-@Mod(modid="autojoin", name="AutoJoin", version="v1.5")
+@Mod(modid="autojoin", name="AutoJoin", version="v1.5.1")
 public class AutoJoin {
 
 	Minecraft mc = Minecraft.getMinecraft();
