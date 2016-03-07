@@ -27,7 +27,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 @Mod(modid="autojoin", name="AutoJoin", version="v1.5.2")
 public class AutoJoin {
 
-	Minecraft mc = Minecraft.getMinecraft();
+	Minecraft mc;
 	ServerData last;
 	int counter = 0;
 	boolean logoutFlag;
@@ -43,6 +43,7 @@ public class AutoJoin {
 	
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
+		mc = Minecraft.getMinecraft();
 		FMLCommonHandler.instance().bus().register(this);
 		logFile = new File(mc.mcDataDir, "AutojoinLog.txt");
 		if(!logFile.isFile()) {
