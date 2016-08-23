@@ -22,7 +22,7 @@ group= 'com.biggestnerd.autojoin' // http://maven.apache.org/guides/mini/guide-n
 archivesBaseName = 'AutoJoin'
 
 minecraft {
-    version = "1.10.2-12.18.1.2065
+    version = "1.10.2-12.18.1.2065"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.
